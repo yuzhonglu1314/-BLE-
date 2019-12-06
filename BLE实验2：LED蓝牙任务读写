@@ -70,20 +70,23 @@
 #define DEAD_BEEF                       0xDEADBEEF                                  /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
 static uint16_t                         m_conn_handle = BLE_CONN_HANDLE_INVALID;    /**< Handle of the current connection. */
+/** <当前连接的句柄。 */
 static ble_lbs_t                        m_lbs;                                      /**< LED Button Service instance. */
+/** <LED按钮服务实例。 */
 
 
-/**@brief Function for assert macro callback.
- *
- * @details This function will be called in case of an assert in the SoftDevice.
- *
- * @warning This handler is an example only and does not fit a final product. You need to analyze 
- *          how your product is supposed to react in case of Assert.
- * @warning On assert from the SoftDevice, the system can only recover on reset.
- *
- * @param[in] line_num    Line number of the failing ASSERT call.
- * @param[in] p_file_name File name of the failing ASSERT call.
- */
+/** @ brief用于断言宏回调的函数。
+?*
+?* @details如果在SoftDevice中断言，则将调用此函数。
+?*
+?* @warning此处理程序仅是示例，不适合最终产品。你需要分析
+?*在断言的情况下您的产品应该如何反应。
+?* @warning在从SoftDevice断言时，系统只能恢复
+ver重置。
+?*
+?* @param [in] line_num失败的ASSERT调用的行号。
+?* @param [in] p_file_name失败的ASSERT调用的文件名。
+*/
  
 void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name)
 {
@@ -110,23 +113,26 @@ static void leds_init(void)
 
 static void timers_init(void)
 {
-    // Initialize timer module, making it use the scheduler
-    APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
+//初始化计时器模块，使其使用调度程序
+	APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
 }
 
 
-/**@brief Function for the GAP initialization.
- *
- * @details This function sets up all the necessary GAP (Generic Access Profile) parameters of the
- *          device including the device name, appearance, and the preferred connection parameters.
- */
+/** @ brief用于GAP初始化的函数。
+?*
+?* @details此功能设置所有必需的GAP（通用访问配置文件）参数。
+?*设备，包括设备名称，外观和首选的连接参数。
+?*/
+
 static void gap_params_init(void)
 {
     uint32_t                err_code;
-    ble_gap_conn_params_t   gap_conn_params;
-    ble_gap_conn_sec_mode_t sec_mode;
+    ble_gap_conn_params_t   gap_conn_params;//ble_gap_conn_params_t 是一个数据结构
+    ble_gap_conn_sec_mode_t sec_mode;//ble_gap_conn_sec_mode_t 一个是数据结构，定义了服务模式，级别
 
     BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode);
+	// BLE_GAP_CONN_SEC_MODE_SET_OPEN(ptr)  do {(ptr)->sm = 1; (ptr)->lv = 1;} while(0);
+	//将ptr指向的sec_mode设置为需要加密，但没有MITM保护
 
     err_code = sd_ble_gap_device_name_set(&sec_mode,
                                           (const uint8_t *)DEVICE_NAME,
@@ -145,11 +151,11 @@ static void gap_params_init(void)
 }
 
 
-/**@brief Function for initializing the Advertising functionality.
- *
- * @details Encodes the required advertising data and passes it to the stack.
- *          Also builds a structure to be passed to the stack when starting advertising.
- */
+/** @ brief函数，用于初始化广告功能。
+?*
+?* @details编码所需的广告数据并将其传递到堆栈。
+?*还构建开始广告时传递到堆栈的结构。
+*/
 static void advertising_init(void)
 {
     uint32_t      err_code;
@@ -175,11 +181,11 @@ static void advertising_init(void)
 }
 
 
-/**@brief Function for handling write events to the LED characteristic.
- *
- * @param[in] p_lbs     Instance of LED Button Service to which the write applies.
- * @param[in] led_state Written/desired state of the LED.
- */
+/** @ brief用于处理写入到LED特性的事件的函数。
+?*
+?* @param [in] p_lbs写入所应用的LED按钮服务的实例。
+?* @param [in] led_state LED的写入/期望状态。
+?*/
 static void led_write_handler(ble_lbs_t * p_lbs, uint8_t led_state)
 {
     if (led_state)
@@ -193,8 +199,8 @@ static void led_write_handler(ble_lbs_t * p_lbs, uint8_t led_state)
 }
 
 
-/**@brief Function for initializing services that will be used by the application.
- */
+/** @ brief函数，用于初始化将由应用程序使用的服务。
+?*/
 static void services_init(void)
 {
     uint32_t       err_code;
@@ -218,6 +224,19 @@ static void services_init(void)
  *
  * @param[in] p_evt  Event received from the Connection Parameters Module.
  */
+
+/** @ brief用于处理连接参数模块的函数。
+?*
+?* @details将为连接参数模块中的所有事件调用此函数
+?*传递给应用程序。
+?*
+?* @note此功能所做的只是断开连接。这可以通过简单地完成
+?*设置disconnect_on_fail配置参数，但是我们使用事件
+?*处理程序机制演示其用法。
+?*
+?* @param [in] p_evt从连接参数模块收到的事件。
+?*/
+
 static void on_conn_params_evt(ble_conn_params_evt_t * p_evt)
 {
     uint32_t err_code;
@@ -234,6 +253,11 @@ static void on_conn_params_evt(ble_conn_params_evt_t * p_evt)
  *
  * @param[in] nrf_error  Error code containing information about what went wrong.
  */
+
+/** @ brief用于处理连接参数错误的函数。
+?*
+?* @param [in] nrf_error错误代码，其中包含有关错误原因的信息。
+?*/
 static void conn_params_error_handler(uint32_t nrf_error)
 {
     APP_ERROR_HANDLER(nrf_error);
@@ -242,6 +266,8 @@ static void conn_params_error_handler(uint32_t nrf_error)
 
 /**@brief Function for initializing the Connection Parameters module.
  */
+/** @ brief用于初始化连接参数模块的函数。
+?*/
 static void conn_params_init(void)
 {
     uint32_t               err_code;
@@ -265,6 +291,8 @@ static void conn_params_init(void)
 
 /**@brief Function for starting advertising.
  */
+/** @ brief用于启动广告的功能。
+?*/
 static void advertising_start(void)
 {
     uint32_t             err_code;
@@ -289,6 +317,10 @@ static void advertising_start(void)
  *
  * @param[in] p_ble_evt  Bluetooth stack event.
  */
+/** @ brief函数，用于处理应用程序的BLE堆栈事件。
+?*
+?* @param [in] p_ble_evt蓝牙堆栈事件。
+?*/
 static void on_ble_evt(ble_evt_t * p_ble_evt)
 {
     uint32_t err_code;
@@ -316,6 +348,7 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
 
         case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
             // Pairing not supported
+				//不支持配对
             err_code = sd_ble_gap_sec_params_reply(m_conn_handle,
                                                    BLE_GAP_SEC_STATUS_PAIRING_NOT_SUPP,
                                                    NULL,
@@ -325,12 +358,14 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
 
         case BLE_GATTS_EVT_SYS_ATTR_MISSING:
             // No system attributes have been stored.
+				//没有存储任何系统属性
             err_code = sd_ble_gatts_sys_attr_set(m_conn_handle, NULL, 0, 0);
             APP_ERROR_CHECK(err_code);
             break;
 
         default:
             // No implementation needed.
+				//无需执行。
             break;
     }
 }
@@ -343,6 +378,13 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
  *
  * @param[in] p_ble_evt  Bluetooth stack event.
  */
+/** @ brief函数，用于使用BLE堆栈事件处理程序向所有模块调度BLE堆栈事件。
+?*
+?* @details在BLE堆栈之后从主循环的调度程序中调用此函数
+?*活动已收到。
+?*
+?* @param [in] p_ble_evt蓝牙堆栈事件。
+?*/
 static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
 {
     on_ble_evt(p_ble_evt);
@@ -355,14 +397,20 @@ static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
  *
  * @details Initializes the SoftDevice and the BLE event interrupt.
  */
+/** @ brief函数，用于初始化BLE堆栈。
+?*
+?* @details初始化SoftDevice和BLE事件中断。
+?*/
 static void ble_stack_init(void)
 {
     uint32_t err_code;
 
     // Initialize the SoftDevice handler module.
+	//初始化SoftDevice处理程序模块
     SOFTDEVICE_HANDLER_INIT(NRF_CLOCK_LFCLKSRC_XTAL_20_PPM, false);
 
     // Enable BLE stack 
+	//启用BLE堆栈
     ble_enable_params_t ble_enable_params;
     memset(&ble_enable_params, 0, sizeof(ble_enable_params));
     err_code = sd_ble_enable(&ble_enable_params);
@@ -376,6 +424,7 @@ static void ble_stack_init(void)
     APP_ERROR_CHECK(err_code);
 
     // Subscribe for BLE events.
+		//订阅BLE事件。
     err_code = softdevice_ble_evt_handler_set(ble_evt_dispatch);
     APP_ERROR_CHECK(err_code);
 }
@@ -386,6 +435,11 @@ static void ble_stack_init(void)
  * @param[in] pin_no        The pin that the event applies to.
  * @param[in] button_action The button action (press/release).
  */
+/** @ brief用于处理来自按钮处理程序模块的事件的函数。
+?*
+?* @param [in] pin_no事件适用的引脚。
+?* @param [in] button_action按钮动作（按下/释放）。
+?*/
 static void button_event_handler(uint8_t pin_no, uint8_t button_action)
 {
     uint32_t err_code;
@@ -411,11 +465,14 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
 
 /**@brief Function for initializing the button handler module.
  */
+/** @ brief用于初始化按钮处理程序模块的函数。
+?*/
 static void buttons_init(void)
 {
     uint32_t err_code;
 
     //The array must be static because a pointer to it will be saved in the button handler module.
+	//数组必须为静态，因为指向它的指针将保存在按钮处理程序模块中。
     static app_button_cfg_t buttons[] =
     {
         {LEDBUTTON_BUTTON_PIN, false, BUTTON_PULL, button_event_handler}
@@ -429,6 +486,8 @@ static void buttons_init(void)
 
 /**@brief Function for the Power Manager.
  */
+/** @简述电源管理器的功能。
+? */
 static void power_manage(void)
 {
     uint32_t err_code = sd_app_evt_wait();
@@ -452,9 +511,11 @@ int main(void)
     conn_params_init();
 
     // Start execution.
+	//开始执行。
     advertising_start();
 
     // Enter main loop.
+	//进入主循环。
     for (;;)
     {
         power_manage();
