@@ -1,4 +1,14 @@
-
+/* Copyright (c) 2014 Nordic Semiconductor. All Rights Reserved.
+ *
+ * The information contained herein is property of Nordic Semiconductor ASA.
+ * Terms and conditions of usage are described in detail in NORDIC
+ * SEMICONDUCTOR STANDARD SOFTWARE LICENSE AGREEMENT.
+ *
+ * Licensees are granted free, non-transferable use of the information. NO
+ * WARRANTY of ANY KIND is provided. This heading must NOT be removed from
+ * the file.
+ *
+ */
 #ifndef BOARDS_H
 #define BOARDS_H
 
@@ -41,6 +51,14 @@
 #define LEDS_ON(leds_mask) do {  NRF_GPIO->OUTCLR = (leds_mask) & (LEDS_MASK & LEDS_INV_MASK); \
                            NRF_GPIO->OUTSET = (leds_mask) & (LEDS_MASK & ~LEDS_INV_MASK); } while (0)
 
+//do与while 中的 \ 是连接的意思，用于代码太长，要用多一行进行书写
+												 
+//什么情况下用宏定义do{}while(0);
+//1.帮助定义复杂的宏以避免错误
+//2. 避免使用goto控制程序流													 
+//3. 避免由宏引起的警告
+//4. 定义单一的函数块来完成复杂的操做
+													 
 #define LED_IS_ON(leds_mask) ((leds_mask) & (NRF_GPIO->OUT ^ LEDS_INV_MASK) )
 
 #define LEDS_INVERT(leds_mask) do { uint32_t gpio_state = NRF_GPIO->OUT;      \
@@ -53,3 +71,23 @@
                                           nrf_gpio_cfg_output(pin); } while (0)
 
 #endif
+
+																					
+/*#include <iostream>
+using namespace std;
+ 
+int main ()
+{
+   // 局部变量声明
+   int a = 10;
+
+   // do 循环执行
+   do
+   {
+       cout << "a 的值：" << a << endl;
+       a = a + 1;
+			//要执行的内容
+   }while( a < 20 );
+ 
+   return 0;
+}*/
