@@ -172,7 +172,7 @@ static void advertising_init(void)
     advdata.flags              = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
 
 
-    memset(&scanrsp, 0, sizeof(scanrsp));
+    memset(&scanrsp, 0, sizeof(scanrsp));//对应文件string,h中的321
     scanrsp.uuids_complete.uuid_cnt = sizeof(adv_uuids) / sizeof(adv_uuids[0]);
     scanrsp.uuids_complete.p_uuids  = adv_uuids;
 
@@ -190,7 +190,7 @@ static void led_write_handler(ble_lbs_t * p_lbs, uint8_t led_state)
 {
     if (led_state)
     {
-        LEDS_ON(LEDBUTTON_LED_PIN);
+        LEDS_ON(LEDBUTTON_LED_PIN);//对应了boards.h的51
     }
     else
     {
